@@ -1,0 +1,38 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://scripts/3D.gd" type="Script" id=2]
+[ext_resource path="res://scenes/jip.tscn" type="PackedScene" id=4]
+[ext_resource path="res://scripts/jip.gd" type="Script" id=5]
+
+[sub_resource type="Gradient" id=3]
+interpolation_mode = 1
+offsets = PoolRealArray( 0, 0.228814, 0.466102, 0.754237, 1 )
+colors = PoolColorArray( 0, 0, 0, 1, 0.211864, 0.211864, 0.211864, 1, 0.491525, 0.491525, 0.491525, 1, 0.754237, 0.754237, 0.754237, 1, 1, 1, 1, 1 )
+
+[sub_resource type="GradientTexture" id=4]
+gradient = SubResource( 3 )
+
+[sub_resource type="Environment" id=5]
+ambient_light_color = Color( 1, 1, 1, 1 )
+ambient_light_energy = 0.3
+adjustment_color_correction = SubResource( 4 )
+
+[node name="3D" type="Spatial"]
+script = ExtResource( 2 )
+
+[node name="Camera" type="Camera" parent="."]
+transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 12.5752, 12.5752 )
+projection = 1
+size = 16.1
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource( 5 )
+
+[node name="DirectionalLight" type="DirectionalLight" parent="."]
+transform = Transform( 0.939693, -0.241845, 0.241845, 0, 0.707107, 0.707107, -0.34202, -0.664463, 0.664463, 0, 0.195447, 0.0387304 )
+shadow_enabled = true
+
+[node name="test_jip" parent="." instance=ExtResource( 4 )]
+transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0, 0 )
+visible = false
+script = ExtResource( 5 )

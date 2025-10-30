@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://assets/pistola.gltf" type="PackedScene" id=1]
+[ext_resource path="res://scripts/pistola.gd" type="Script" id=2]
+
+
+[node name="pistola" instance=ExtResource( 1 )]
+script = ExtResource( 2 )
+
+[node name="root" parent="Node2" index="0"]
+transform = Transform( 1, 0, 0, 0, 0.999391, -0.0348995, 0, 0.0348995, 0.999391, 0, 0, 0 )
+
+[node name="canoalto" parent="Node2/root" index="4"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.00301165 )
+
+[connection signal="animation_finished" from="AnimationPlayer" to="." method="_on_AnimationPlayer_animation_finished"]
