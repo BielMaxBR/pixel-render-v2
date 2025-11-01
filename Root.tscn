@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://scripts/Root.gd" type="Script" id=1]
 [ext_resource path="res://assets/neco.gltf" type="PackedScene" id=2]
@@ -17,17 +17,24 @@ ambient_light_color = Color( 1, 1, 1, 1 )
 [sub_resource type="ViewportTexture" id=7]
 viewport_path = NodePath("Viewport/Viewport")
 
-[sub_resource type="StyleBoxFlat" id=4]
-bg_color = Color( 0.14902, 0.152941, 0.2, 1 )
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
+[sub_resource type="StyleBoxFlat" id=11]
+bg_color = Color( 0.6, 0.6, 0.6, 0 )
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
 border_width_bottom = 2
-expand_margin_left = 1.0
-expand_margin_right = 1.0
-expand_margin_top = 1.0
-expand_margin_bottom = 1.0
-anti_aliasing = false
+border_color = Color( 1, 1, 1, 1 )
+expand_margin_left = 2.0
+expand_margin_right = 2.0
+expand_margin_top = 2.0
+expand_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxFlat" id=12]
+bg_color = Color( 0.145098, 0.145098, 0.164706, 1 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
 
 [sub_resource type="ViewportTexture" id=10]
 viewport_path = NodePath("ResultContainer/Viewport")
@@ -40,37 +47,40 @@ size_flags_vertical = 3
 script = ExtResource( 1 )
 
 [node name="ResultContainer" type="ViewportContainer" parent="."]
-margin_right = 40.0
-margin_bottom = 64.0
+margin_right = 92.0
+margin_bottom = 81.0
+stretch = true
 
 [node name="Viewport" type="Viewport" parent="ResultContainer"]
-size = Vector2( 128, 64 )
-own_world = true
+size = Vector2( 120, 120 )
+size_override_stretch = true
+transparent_bg = true
 handle_input_locally = false
-render_target_v_flip = true
 render_target_update_mode = 3
 gui_disable_input = true
 
-[node name="Sprite" type="Sprite" parent="ResultContainer/Viewport"]
-scale = Vector2( 0.331, 0.331 )
-texture = SubResource( 9 )
-
 [node name="Camera2D" type="Camera2D" parent="ResultContainer/Viewport"]
 current = true
-zoom = Vector2( 8, 8 )
+zoom = Vector2( 10, 10 )
+
+[node name="Sprite" type="Sprite" parent="ResultContainer/Viewport"]
+texture = SubResource( 9 )
 
 [node name="Viewport" type="ViewportContainer" parent="."]
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_right = 976.0
-margin_bottom = 1400.0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -600.0
+margin_top = -600.0
+margin_right = 600.0
+margin_bottom = 600.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="Viewport" type="Viewport" parent="Viewport"]
-size = Vector2( 2000, 2000 )
+size = Vector2( 1200, 1200 )
 size_override_stretch = true
-own_world = true
 transparent_bg = true
 handle_input_locally = false
 render_target_update_mode = 3
@@ -80,9 +90,10 @@ unique_name_in_owner = true
 
 [node name="CameraRoot" type="Spatial" parent="Viewport/Viewport/Object"]
 unique_name_in_owner = true
-transform = Transform( -0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, 0.5, -0.5, 0, 0, 0 )
+transform = Transform( -0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, -0.707107, 0, 0, 0 )
 
 [node name="XCamera" type="Spatial" parent="Viewport/Viewport/Object/CameraRoot"]
+transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 0, 0 )
 
 [node name="Camera" type="Camera" parent="Viewport/Viewport/Object/CameraRoot/XCamera"]
 unique_name_in_owner = true
@@ -100,6 +111,7 @@ environment = SubResource( 2 )
 [node name="Arrows" type="ImmediateGeometry" parent="Viewport/Viewport/Object"]
 unique_name_in_owner = true
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0115504, -0.00897646, -0.00664115 )
+visible = false
 material_override = SubResource( 5 )
 cast_shadow = 0
 script = ExtResource( 3 )
@@ -151,25 +163,38 @@ items = [ "where", null, 0, false, false, 0, 0, null, "", false, "is", null, 0, 
 [node name="HSplitContainer" type="HSplitContainer" parent="VBoxContainer"]
 margin_top = 39.0
 margin_right = 1024.0
-margin_bottom = 560.0
+margin_bottom = 559.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 split_offset = 200
 
 [node name="ViewportPanel" type="Panel" parent="VBoxContainer/HSplitContainer"]
 margin_right = 706.0
-margin_bottom = 521.0
+margin_bottom = 520.0
 rect_min_size = Vector2( 50, 0 )
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="Viewport" type="TextureRect" parent="VBoxContainer/HSplitContainer/ViewportPanel"]
+[node name="VSplitContainer" type="VSplitContainer" parent="VBoxContainer/HSplitContainer/ViewportPanel"]
 anchor_right = 1.0
 anchor_bottom = 1.0
+size_flags_vertical = 3
+split_offset = 271
+
+[node name="Viewport" type="TextureRect" parent="VBoxContainer/HSplitContainer/ViewportPanel/VSplitContainer"]
+margin_right = 706.0
+margin_bottom = 520.0
 texture = SubResource( 7 )
 expand = true
-stretch_mode = 7
+stretch_mode = 6
 flip_v = true
+
+[node name="AnimationMenu" type="PanelContainer" parent="VBoxContainer/HSplitContainer/ViewportPanel/VSplitContainer"]
+unique_name_in_owner = true
+visible = false
+margin_top = 283.0
+margin_right = 706.0
+margin_bottom = 520.0
 
 [node name="Block" type="Button" parent="VBoxContainer/HSplitContainer/ViewportPanel"]
 unique_name_in_owner = true
@@ -187,49 +212,55 @@ text = "Block Mouse"
 [node name="Side" type="ScrollContainer" parent="VBoxContainer/HSplitContainer"]
 margin_left = 718.0
 margin_right = 1024.0
-margin_bottom = 521.0
+margin_bottom = 520.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
-custom_styles/bg = SubResource( 4 )
+custom_styles/bg = SubResource( 11 )
 scroll_horizontal_enabled = false
 
-[node name="Container" type="VBoxContainer" parent="VBoxContainer/HSplitContainer/Side"]
-margin_left = 2.0
-margin_top = 2.0
-margin_right = 304.0
-margin_bottom = 100.0
+[node name="Configs" type="VBoxContainer" parent="VBoxContainer/HSplitContainer/Side"]
+margin_left = 3.0
+margin_top = 3.0
+margin_right = 303.0
+margin_bottom = 518.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="CameraConfig" type="VBoxContainer" parent="VBoxContainer/HSplitContainer/Side/Configs"]
+margin_right = 300.0
+margin_bottom = 122.0
 grow_horizontal = 0
 size_flags_horizontal = 3
 alignment = 2
 
-[node name="Label" type="Label" parent="VBoxContainer/HSplitContainer/Side/Container"]
-margin_right = 302.0
+[node name="Label" type="Label" parent="VBoxContainer/HSplitContainer/Side/Configs/CameraConfig"]
+margin_right = 300.0
 margin_bottom = 14.0
 size_flags_horizontal = 3
 text = "Camera"
 align = 1
 valign = 1
 
-[node name="offset" type="HBoxContainer" parent="VBoxContainer/HSplitContainer/Side/Container"]
+[node name="offset" type="HBoxContainer" parent="VBoxContainer/HSplitContainer/Side/Configs/CameraConfig"]
 margin_top = 18.0
-margin_right = 302.0
+margin_right = 300.0
 margin_bottom = 42.0
 size_flags_horizontal = 3
 
-[node name="Label" type="Label" parent="VBoxContainer/HSplitContainer/Side/Container/offset"]
+[node name="Label" type="Label" parent="VBoxContainer/HSplitContainer/Side/Configs/CameraConfig/offset"]
 margin_top = 5.0
-margin_right = 68.0
+margin_right = 66.0
 margin_bottom = 19.0
 size_flags_horizontal = 3
 text = "Offset"
 
-[node name="Positions" type="HBoxContainer" parent="VBoxContainer/HSplitContainer/Side/Container/offset"]
-margin_left = 72.0
-margin_right = 302.0
+[node name="Positions" type="HBoxContainer" parent="VBoxContainer/HSplitContainer/Side/Configs/CameraConfig/offset"]
+margin_left = 70.0
+margin_right = 300.0
 margin_bottom = 24.0
 size_flags_horizontal = 3
 
-[node name="PX" type="SpinBox" parent="VBoxContainer/HSplitContainer/Side/Container/offset/Positions"]
+[node name="PX" type="SpinBox" parent="VBoxContainer/HSplitContainer/Side/Configs/CameraConfig/offset/Positions"]
 unique_name_in_owner = true
 margin_right = 74.0
 margin_bottom = 24.0
@@ -242,7 +273,7 @@ allow_lesser = true
 align = 3
 prefix = "X"
 
-[node name="PY" type="SpinBox" parent="VBoxContainer/HSplitContainer/Side/Container/offset/Positions"]
+[node name="PY" type="SpinBox" parent="VBoxContainer/HSplitContainer/Side/Configs/CameraConfig/offset/Positions"]
 unique_name_in_owner = true
 margin_left = 78.0
 margin_right = 152.0
@@ -255,7 +286,7 @@ allow_greater = true
 allow_lesser = true
 prefix = "Y"
 
-[node name="PZ" type="SpinBox" parent="VBoxContainer/HSplitContainer/Side/Container/offset/Positions"]
+[node name="PZ" type="SpinBox" parent="VBoxContainer/HSplitContainer/Side/Configs/CameraConfig/offset/Positions"]
 unique_name_in_owner = true
 margin_left = 156.0
 margin_right = 230.0
@@ -268,26 +299,26 @@ allow_greater = true
 allow_lesser = true
 prefix = "Z"
 
-[node name="rotation" type="HBoxContainer" parent="VBoxContainer/HSplitContainer/Side/Container"]
+[node name="rotation" type="HBoxContainer" parent="VBoxContainer/HSplitContainer/Side/Configs/CameraConfig"]
 margin_top = 46.0
-margin_right = 302.0
+margin_right = 300.0
 margin_bottom = 70.0
 size_flags_horizontal = 3
 
-[node name="Label" type="Label" parent="VBoxContainer/HSplitContainer/Side/Container/rotation"]
+[node name="Label" type="Label" parent="VBoxContainer/HSplitContainer/Side/Configs/CameraConfig/rotation"]
 margin_top = 5.0
-margin_right = 68.0
+margin_right = 66.0
 margin_bottom = 19.0
 size_flags_horizontal = 3
 text = "Rotation"
 
-[node name="Positions" type="HBoxContainer" parent="VBoxContainer/HSplitContainer/Side/Container/rotation"]
-margin_left = 72.0
-margin_right = 302.0
+[node name="Positions" type="HBoxContainer" parent="VBoxContainer/HSplitContainer/Side/Configs/CameraConfig/rotation"]
+margin_left = 70.0
+margin_right = 300.0
 margin_bottom = 24.0
 size_flags_horizontal = 3
 
-[node name="RX" type="SpinBox" parent="VBoxContainer/HSplitContainer/Side/Container/rotation/Positions"]
+[node name="RX" type="SpinBox" parent="VBoxContainer/HSplitContainer/Side/Configs/CameraConfig/rotation/Positions"]
 unique_name_in_owner = true
 margin_right = 74.0
 margin_bottom = 24.0
@@ -299,7 +330,7 @@ allow_greater = true
 allow_lesser = true
 prefix = "X"
 
-[node name="RY" type="SpinBox" parent="VBoxContainer/HSplitContainer/Side/Container/rotation/Positions"]
+[node name="RY" type="SpinBox" parent="VBoxContainer/HSplitContainer/Side/Configs/CameraConfig/rotation/Positions"]
 unique_name_in_owner = true
 margin_left = 78.0
 margin_right = 152.0
@@ -312,7 +343,7 @@ allow_greater = true
 allow_lesser = true
 prefix = "Y"
 
-[node name="RZ" type="SpinBox" parent="VBoxContainer/HSplitContainer/Side/Container/rotation/Positions"]
+[node name="RZ" type="SpinBox" parent="VBoxContainer/HSplitContainer/Side/Configs/CameraConfig/rotation/Positions"]
 unique_name_in_owner = true
 margin_left = 156.0
 margin_right = 230.0
@@ -325,56 +356,130 @@ allow_greater = true
 allow_lesser = true
 prefix = "Z"
 
-[node name="zoom" type="HBoxContainer" parent="VBoxContainer/HSplitContainer/Side/Container"]
+[node name="zoom" type="HBoxContainer" parent="VBoxContainer/HSplitContainer/Side/Configs/CameraConfig"]
 margin_top = 74.0
-margin_right = 302.0
+margin_right = 300.0
 margin_bottom = 98.0
 size_flags_horizontal = 3
 
-[node name="Label" type="Label" parent="VBoxContainer/HSplitContainer/Side/Container/zoom"]
+[node name="Label" type="Label" parent="VBoxContainer/HSplitContainer/Side/Configs/CameraConfig/zoom"]
 margin_top = 5.0
-margin_right = 149.0
+margin_right = 148.0
 margin_bottom = 19.0
 size_flags_horizontal = 3
 text = "Zoom"
 
-[node name="zoom" type="SpinBox" parent="VBoxContainer/HSplitContainer/Side/Container/zoom"]
+[node name="zoom" type="SpinBox" parent="VBoxContainer/HSplitContainer/Side/Configs/CameraConfig/zoom"]
 unique_name_in_owner = true
-margin_left = 153.0
-margin_right = 302.0
+margin_left = 152.0
+margin_right = 300.0
 margin_bottom = 24.0
 size_flags_horizontal = 3
 max_value = 10000.0
 step = 0.001
 
+[node name="type" type="HBoxContainer" parent="VBoxContainer/HSplitContainer/Side/Configs/CameraConfig"]
+margin_top = 102.0
+margin_right = 300.0
+margin_bottom = 122.0
+
+[node name="Label" type="Label" parent="VBoxContainer/HSplitContainer/Side/Configs/CameraConfig/type"]
+margin_top = 3.0
+margin_right = 148.0
+margin_bottom = 17.0
+size_flags_horizontal = 3
+text = "Camera Type"
+
+[node name="type" type="OptionButton" parent="VBoxContainer/HSplitContainer/Side/Configs/CameraConfig/type"]
+margin_left = 152.0
+margin_right = 300.0
+margin_bottom = 20.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "Perspective"
+items = [ "Perspective", null, false, 0, null, "Orthogonal", null, false, 1, null ]
+selected = 0
+
+[node name="AnimConfig" type="VBoxContainer" parent="VBoxContainer/HSplitContainer/Side/Configs"]
+margin_top = 126.0
+margin_right = 300.0
+margin_bottom = 168.0
+
+[node name="Label" type="Label" parent="VBoxContainer/HSplitContainer/Side/Configs/AnimConfig"]
+margin_right = 300.0
+margin_bottom = 14.0
+text = "Animation"
+align = 1
+
+[node name="Directions" type="HBoxContainer" parent="VBoxContainer/HSplitContainer/Side/Configs/AnimConfig"]
+margin_top = 18.0
+margin_right = 300.0
+margin_bottom = 42.0
+
+[node name="Label" type="Label" parent="VBoxContainer/HSplitContainer/Side/Configs/AnimConfig/Directions"]
+margin_top = 5.0
+margin_right = 148.0
+margin_bottom = 19.0
+size_flags_horizontal = 3
+text = "Directions"
+
+[node name="directions" type="SpinBox" parent="VBoxContainer/HSplitContainer/Side/Configs/AnimConfig/Directions"]
+unique_name_in_owner = true
+margin_left = 152.0
+margin_right = 300.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+min_value = 1.0
+max_value = 32.0
+value = 1.0
+allow_greater = true
+
 [node name="Bottom" type="PanelContainer" parent="VBoxContainer"]
-margin_top = 565.0
+margin_top = 564.0
 margin_right = 1024.0
 margin_bottom = 600.0
 rect_min_size = Vector2( 0, 35 )
 size_flags_vertical = 9
 
+[node name="Buttons" type="HBoxContainer" parent="VBoxContainer/Bottom"]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 1017.0
+margin_bottom = 29.0
+
+[node name="AnimationButton" type="ToolButton" parent="VBoxContainer/Bottom/Buttons"]
+margin_right = 78.0
+margin_bottom = 22.0
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_colors/font_color_pressed = Color( 0.278431, 0.352941, 1, 1 )
+toggle_mode = true
+text = "Animation"
+
 [node name="PopupPreview" type="Panel" parent="."]
-anchor_left = 0.968
-anchor_top = 0.958
-anchor_right = 0.968
-anchor_bottom = 0.958
-margin_left = -277.232
-margin_top = -218.8
-margin_right = -0.231995
-margin_bottom = 0.200012
+anchor_left = 0.988
+anchor_top = 0.944
+anchor_right = 0.988
+anchor_bottom = 0.944
+margin_left = -277.712
+margin_top = -224.4
+margin_right = -0.712036
+margin_bottom = -5.40002
 mouse_filter = 2
 mouse_default_cursor_shape = 3
+custom_styles/panel = SubResource( 12 )
 
 [node name="TextureRect" type="TextureRect" parent="PopupPreview"]
 anchor_right = 1.0
 anchor_bottom = 1.0
+margin_left = 7.0
+margin_top = -3.0
+margin_right = 7.0
+margin_bottom = -3.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 texture = SubResource( 10 )
 expand = true
 stretch_mode = 6
-flip_v = true
 
 [node name="Label" type="Label" parent="PopupPreview"]
 margin_left = 3.30151
@@ -386,12 +491,15 @@ size_flags_vertical = 7
 text = "PREVIEW"
 
 [connection signal="gui_input" from="Viewport" to="." method="_on_Viewport_gui_input"]
-[connection signal="gui_input" from="VBoxContainer/HSplitContainer/ViewportPanel/Viewport" to="." method="_on_Viewport_gui_input"]
+[connection signal="gui_input" from="VBoxContainer/HSplitContainer/ViewportPanel/VSplitContainer/Viewport" to="." method="_on_Viewport_gui_input"]
 [connection signal="toggled" from="VBoxContainer/HSplitContainer/ViewportPanel/Block" to="." method="_on_Block_toggled"]
-[connection signal="value_changed" from="VBoxContainer/HSplitContainer/Side/Container/offset/Positions/PX" to="." method="_on_PX_value_changed"]
-[connection signal="value_changed" from="VBoxContainer/HSplitContainer/Side/Container/offset/Positions/PY" to="." method="_on_PY_value_changed"]
-[connection signal="value_changed" from="VBoxContainer/HSplitContainer/Side/Container/offset/Positions/PZ" to="." method="_on_PZ_value_changed"]
-[connection signal="value_changed" from="VBoxContainer/HSplitContainer/Side/Container/rotation/Positions/RX" to="." method="_on_RX_value_changed"]
-[connection signal="value_changed" from="VBoxContainer/HSplitContainer/Side/Container/rotation/Positions/RY" to="." method="_on_RY_value_changed"]
-[connection signal="value_changed" from="VBoxContainer/HSplitContainer/Side/Container/rotation/Positions/RZ" to="." method="_on_RZ_value_changed"]
-[connection signal="value_changed" from="VBoxContainer/HSplitContainer/Side/Container/zoom/zoom" to="." method="_on_zoom_value_changed"]
+[connection signal="value_changed" from="VBoxContainer/HSplitContainer/Side/Configs/CameraConfig/offset/Positions/PX" to="." method="_on_PX_value_changed"]
+[connection signal="value_changed" from="VBoxContainer/HSplitContainer/Side/Configs/CameraConfig/offset/Positions/PY" to="." method="_on_PY_value_changed"]
+[connection signal="value_changed" from="VBoxContainer/HSplitContainer/Side/Configs/CameraConfig/offset/Positions/PZ" to="." method="_on_PZ_value_changed"]
+[connection signal="value_changed" from="VBoxContainer/HSplitContainer/Side/Configs/CameraConfig/rotation/Positions/RX" to="." method="_on_RX_value_changed"]
+[connection signal="value_changed" from="VBoxContainer/HSplitContainer/Side/Configs/CameraConfig/rotation/Positions/RY" to="." method="_on_RY_value_changed"]
+[connection signal="value_changed" from="VBoxContainer/HSplitContainer/Side/Configs/CameraConfig/rotation/Positions/RZ" to="." method="_on_RZ_value_changed"]
+[connection signal="value_changed" from="VBoxContainer/HSplitContainer/Side/Configs/CameraConfig/zoom/zoom" to="." method="_on_zoom_value_changed"]
+[connection signal="item_selected" from="VBoxContainer/HSplitContainer/Side/Configs/CameraConfig/type/type" to="." method="_on_type_item_selected"]
+[connection signal="value_changed" from="VBoxContainer/HSplitContainer/Side/Configs/AnimConfig/Directions/directions" to="." method="_on_directions_value_changed"]
+[connection signal="toggled" from="VBoxContainer/Bottom/Buttons/AnimationButton" to="." method="_on_AnimationButton_toggled"]
