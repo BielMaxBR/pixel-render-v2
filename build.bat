@@ -1,0 +1,1 @@
+g++ -o test.exe src/main.cpp  -I include -L lib -lraylib -lgdi32 -lwinmm && test.exe
