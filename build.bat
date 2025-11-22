@@ -1,1 +1,1 @@
-g++ -o build/test.exe src/*.cpp -I include -L lib -lraylib -lgdi32 -lwinmm && build/test.exe
+g++ -o build/test.exe src/*.cpp -I include -L lib -lraylib -lgdi32 -lwinmm -limm32 && build/test.exe

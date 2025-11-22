@@ -1,1 +1,49 @@
-build/
+# =====================
+# Build e CMake
+# =====================
+/build/
+/CMakeFiles/
+/CMakeCache.txt
+/Makefile
+/*.cmake
+/*.cbp
+/*.user
+/*.sln
+/*.vcxproj*
+/*.idea/
+/*.vs/
+
+# =====================
+# Executáveis e objetos
+# =====================
+*.exe
+*.o
+*.obj
+*.out
+*.a
+*.lib
+*.dll
+*.pdb
+
+# =====================
+# Sistema / OS
+# =====================
+.DS_Store
+Thumbs.db
+
+# =====================
+# Logs e temporários
+# =====================
+*.log
+*.tmp
+
+# =====================
+# VSCode
+# =====================
+.vscode/
+
+# =====================
+# Python / scripts (se tiver)
+# =====================
+__pycache__/
+*.pyc

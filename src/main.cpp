@@ -1,5 +1,5 @@
 #include "raylib.h"
-#include "rlImGui.h"  
+#include "rlImGui.h"
 #include "imgui.h"
 
 int main() {

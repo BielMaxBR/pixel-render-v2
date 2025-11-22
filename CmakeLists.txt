@@ -1,0 +1,72 @@
+cmake_minimum_required(VERSION 3.15)
+project(PixelRenderer)
+
+set(CMAKE_CXX_STANDARD 17)
+
+# Diretórios
+set(SRC_DIR src)
+set(EXTERNAL_DIR external)
+set(IMGUI_DIR ${EXTERNAL_DIR}/imgui)
+set(RLIMGUI_DIR ${EXTERNAL_DIR}/rlimgui)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out)
+
+
+# Arquivos do seu jogo
+file(GLOB GAME_SOURCES
+    ${SRC_DIR}/*.cpp
+)
+file(GLOB IMGUI_SRC
+    ${IMGUI_DIR}/*.cpp
+)
+file(GLOB RLIMGUI_SRC
+    ${RLIMGUI_DIR}/*.cpp
+)
+
+# ImGui (compilado como biblioteca própria)
+add_library(imgui STATIC
+    ${IMGUI_SRC}
+)
+
+target_include_directories(imgui PUBLIC
+    ${IMGUI_DIR}/include
+)
+
+# rlImGui (biblioteca separada)
+add_library(rlimgui STATIC
+    ${RLIMGUI_SRC}
+)
+
+target_include_directories(rlimgui PUBLIC
+    ${IMGUI_DIR}/include
+    ${RLIMGUI_DIR}/include
+    include
+)
+
+# Binário final do jogo
+add_executable(game
+    ${GAME_SOURCES}
+)
+
+# Raylib
+# Se estiver usando MinGW com .a dentro de lib/
+target_link_directories(game PRIVATE lib)
+
+target_include_directories(game PRIVATE
+    include
+    ${IMGUI_DIR}/include
+    ${RLIMGUI_DIR}/include
+)
+
+target_link_libraries(game PRIVATE
+    raylib
+    imgui
+    rlimgui
+    gdi32
+    winmm
+    imm32
+    shell32
+)
+
+# Ativar otimização no Release
+set(CMAKE_CXX_FLAGS_RELEASE "-O2")
