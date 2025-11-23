@@ -1,0 +1,7 @@
+CompileFlags:
+  Add:
+    - --target=x86_64-w64-mingw32
+    - -I${W64DEVKIT}/include
+    - -I${W64DEVKIT}/x86_64-w64-mingw32/include
+    - -I${W64DEVKIT}/lib/gcc/x86_64-w64-mingw32/${GCC_VER}/include
+    - -I${W64DEVKIT}/lib/gcc/x86_64-w64-mingw32/${GCC_VER}/include-fixed
