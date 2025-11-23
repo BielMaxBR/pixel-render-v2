@@ -12,7 +12,7 @@
 /*.vcxproj*
 /*.idea/
 /*.vs/
-
+/.cache
 # =====================
 # Executáveis e objetos
 # =====================
