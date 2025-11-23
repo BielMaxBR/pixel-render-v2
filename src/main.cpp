@@ -67,6 +67,39 @@ public:
   }
 };
 
+void showDockSpace(){
+    static bool dockingEnabled = true;
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+    ImGuiWindowFlags window_flags = 
+        ImGuiWindowFlags_NoTitleBar |
+        ImGuiWindowFlags_NoCollapse |
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoBringToFrontOnFocus |
+        ImGuiWindowFlags_NoNavFocus |
+        ImGuiWindowFlags_NoBackground;
+
+    ImGuiViewport* viewport = ImGui::GetMainViewport();
+
+    ImGui::SetNextWindowPos(viewport->Pos);
+    ImGui::SetNextWindowSize(viewport->Size);
+    ImGui::SetNextWindowViewport(viewport->ID);
+
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+
+    ImGui::Begin("DockSpaceHost", nullptr, window_flags);
+
+    ImGui::PopStyleVar(3);
+    ImGuiID dockspace_id = ImGui::GetID("MainDockSpace");
+    ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f));
+
+    ImGui::End();
+
+}
 int main() {
   const int screenWidth = 1200;
   const int screenHeight = 700;
@@ -89,18 +122,7 @@ int main() {
     // start ImGui Conent
     rlImGuiBegin(); 
     // show ImGui Content
-    ImGuiWindowFlags window_flags = 0;
-
-    window_flags |= ImGuiWindowFlags_NoResize;
-    window_flags |= ImGuiWindowFlags_NoMove;
-    window_flags |= ImGuiWindowFlags_NoCollapse;
-    ImGui::SetNextWindowSizeConstraints(ImVec2(GetScreenWidth(),GetScreenHeight()),ImVec2(GetScreenWidth(),GetScreenHeight()));
-
-    if (ImGui::Begin("home", &open, window_flags)) {
-      // ha
-    }
-    ImGui::End();
-
+    showDockSpace();
     ImGui::ShowDemoWindow(&open);
 
     if (cena.Open) cena.Show();
