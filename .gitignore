@@ -20,7 +20,7 @@
 *.o
 *.obj
 *.out
-*.a
+build/*.a
 *.lib
 *.dll
 *.pdb

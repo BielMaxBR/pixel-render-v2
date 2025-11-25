@@ -1,6 +1,7 @@
 #include "imgui.h"
 #include "raylib.h"
 #include "rlImGui.h"
+#include "r3d.h"
 
 class DocumentWindow {
 public:
@@ -105,6 +106,7 @@ int main() {
   const int screenHeight = 700;
   SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT);
   InitWindow(screenWidth, screenHeight, "Pixel Render");
+  R3D_Init(screenWidth, screenHeight, 0);
   rlImGuiSetup(true);
   SetTargetFPS(60);
 
@@ -113,7 +115,7 @@ int main() {
 
   cena.Setup();
   cena.Open = open;
-
+  ImGui::LoadIniSettingsFromDisk("default.ini");
   while (!WindowShouldClose()) {
     cena.Update();
 
@@ -127,12 +129,18 @@ int main() {
 
     if (cena.Open) cena.Show();
 
+    // salvador de padrão
+    // if (ImGui::Button("save", ImVec2(4,4))) {
+    //   ImGui::SaveIniSettingsToDisk("default.ini");
+    // }
+
     // end ImGui Content
     rlImGuiEnd();
     EndDrawing();
   }
   cena.Shutdown();
   rlImGuiShutdown();
+  R3D_Close();
   CloseWindow();
   return 0;
 }

@@ -58,14 +58,35 @@ target_include_directories(game PRIVATE
     ${RLIMGUI_DIR}/include
 )
 
+add_library(r3d_lib STATIC IMPORTED)
+set_target_properties(r3d_lib PROPERTIES
+    IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/lib/libr3d.a"
+    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include"
+)
+
+
+add_library(assimp_lib STATIC IMPORTED)
+set_target_properties(assimp_lib PROPERTIES
+  IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/lib/libassimp.a"
+  INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include"
+)
+add_library(zlib_static_lib STATIC IMPORTED)
+set_target_properties(zlib_static_lib PROPERTIES
+  IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/lib/libzlibstatic.a"
+  INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include/"
+)
+
 target_link_libraries(game PRIVATE
-    raylib
-    imgui
-    rlimgui
-    gdi32
-    winmm
-    imm32
-    shell32
+  r3d_lib
+  assimp_lib
+  raylib
+  imgui
+  rlimgui
+  zlib_static_lib
+  gdi32
+  winmm
+  imm32
+  shell32
 )
 
 # Ativar otimização no Release
