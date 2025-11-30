@@ -1,107 +1,205 @@
+#include "cstdio"
 #include "imgui.h"
-// #include "r3d.h"
 #include "raylib.h"
-// #include "raymath.h"
+#include "raymath.h"
+#include "rcamera.h"
 #include "rlImGui.h"
 
-class DocumentWindow {
+static void HelpMarker(const char *desc) {
+  ImGui::TextDisabled("(?)");
+  if (ImGui::BeginItemTooltip()) {
+    ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+    ImGui::TextUnformatted(desc);
+    ImGui::PopTextWrapPos();
+    ImGui::EndTooltip();
+  }
+}
+
+class DefaultWindow {
 public:
   bool Open = false;
-
-  RenderTexture ViewTexture;
-
-  virtual void Setup() = 0;
-  virtual void Shutdown() = 0;
-  virtual void Show() = 0;
-  virtual void Update() = 0;
-
   bool Focused = false;
 
-  Rectangle ContentRect = {0};
+  virtual void Setup() = 0;
+  virtual void Show() = 0;
+};
+
+class DocumentWindow : public DefaultWindow {
+public:
+  RenderTexture ViewTexture;
+
+  virtual void Shutdown() = 0;
+  virtual void Update() = 0;
+};
+
+class SceneConfig : public DefaultWindow {
+public:
+  Vector3 cameraPosition = {0, 0, 0};
+  Vector2 cameraRotation = {-45, 45};
+  float cameraZoom = 5;
+  void Setup() override { printf("fodase"); }
+  void Show() override {
+    ImGui::SetNextWindowSizeConstraints(ImVec2(100, 100), ImVec2(20000, 20000));
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+    if (ImGui::Begin("Scene Config", &Open, 0)) {
+      ImGui::SeparatorText("Camera");
+      // ImGui::Tree
+      Vec3Menu("Position", &cameraPosition, 0.1, -10000, 10000, true);
+      Vec2Menu("Rotation", &cameraRotation, 0.1, -180, 180);
+      ImGui::DragFloat("Zoom", &cameraZoom, 0.1);
+    }
+    ImGui::End();
+    ImGui::PopStyleVar();
+  }
+  void Vec3Menu(const char *label, Vector3 *vec, float speed = 0.1,
+                float min = 0, float max = 1000, bool help = false) {
+    float list[3] = {vec->x, vec->y, vec->z};
+    ImGui::DragFloat3(label, list, speed, min, max);
+    if (help) {
+      ImGui::SameLine();
+      HelpMarker("Click and drag to edit value.\n"
+                 "Hold SHIFT/ALT for faster/slower edit.\n"
+                 "Double-click or CTRL+click to input value.");
+    }
+    vec->x = list[0];
+    vec->y = list[1];
+    vec->z = list[2];
+  }
+  void Vec2Menu(const char *label, Vector2 *vec, float speed = 0.1,
+                float min = 0, float max = 1000, bool help = false) {
+    float list[2] = {vec->x, vec->y};
+    ImGui::DragFloat2(label, list, speed, min, max);
+    if (help) {
+      ImGui::SameLine();
+      HelpMarker("Click and drag to edit value.\n"
+                 "Hold SHIFT/ALT for faster/slower edit.\n"
+                 "Double-click or CTRL+click to input value.");
+    }
+    vec->x = list[0];
+    vec->y = list[1];
+  }
 };
 
 class Scene : public DocumentWindow {
 public:
-
   Camera3D Camera = {0};
   Model model;
   Material material;
+  SceneConfig *config;
   // R3D_Light light;
 
   int sprite_width = 128;
   int sprite_height = 128;
-  float x = 0;
-  void Setup() override {
-    // ViewTexture = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
-    ViewTexture = LoadRenderTexture(sprite_width, sprite_height);
-    // R3D_UpdateResolution(sprite_width,sprite_height);
 
-    Camera = {.position = {3, 3, -3},
+  Vector2 lastCameraRotation = {0, 0};
+  Vector3 lastCameraPosition = {0, 0, 0};
+  float lastCameraZoom = 0;
+  void Setup() override {
+    ViewTexture = LoadRenderTexture(sprite_width, sprite_height);
+    // lastCameraPosition = config->cameraPosition;
+    // lastCameraRotation = config->cameraRotation;
+    lastCameraZoom = config->cameraZoom;
+    Camera = {.position = { lastCameraZoom, 0, 0},
               .target = {0, 0, 0},
               .up = {0, 1, 0},
               .fovy = 75.0f,
               .projection = CAMERA_PERSPECTIVE};
-    // Create scene objects
-
-    // SetTextureFilter(Texture2D texture, int filter)
+    // .projection = CAMERA_ORTHOGRAPHIC};
 
     model = LoadModel("neco.glb");
-    // model = R3D_LoadModel("neco.fbx");
-    // meshes[0] = R3D_GenMeshSphere(1.0f, 16, 32, true);
-    // meshes[0] = R3D_GenMeshPlane(10.0f,10.0f,10,10,true);
-    // material = R3D_GetDefaultMaterial();
-
-    // Setup lighting
-    // light = R3D_CreateLight(R3D_LIGHT_DIR);
-    // R3D_SetLightDirection(light, (Vector3){-1, 1, 1});
-    // R3D_SetLightActive(light, true);
-    // R3D_EnableShadow(light, 200);
-    // R3D_SetBackgroundColor(BLANK);
-    // R3D_SetAmbientColor(WHITE);
   };
+  void CameraMyYaw(Camera3D *camera, float angle, bool rotateAroundTarget, Vector3 up = Vector3{0,1,0})
+{
+
+    // View vector
+    Vector3 targetPosition = Vector3Subtract(camera->target, camera->position);
+
+    // Rotate view vector around up axis
+    targetPosition = Vector3RotateByAxisAngle(targetPosition, up, angle);
+
+    if (rotateAroundTarget)
+    {
+        // Move position relative to target
+        camera->position = Vector3Subtract(camera->target, targetPosition);
+    }
+    else // rotate around camera.position
+    {
+        // Move target relative to position
+        camera->target = Vector3Add(camera->position, targetPosition);
+    }
+}
+  void UpdateMyCamera() {
+    bool lockView = false;
+    bool rotateAroundTarget = true;
+    bool rotateUp = false;
+    bool moveInWorldPlane = true;
+    // rotação
+    if (!Vector2Equals(config->cameraRotation, lastCameraRotation)) {
+      Vector2 rotationResult = config->cameraRotation - lastCameraRotation;
+
+      // CameraRoll(&Camera, rotationResult.z * DEG2RAD);
+      CameraYaw(&Camera, -rotationResult.x * DEG2RAD, rotateAroundTarget);
+      CameraPitch(&Camera, -rotationResult.y * DEG2RAD, lockView,
+                  rotateAroundTarget, rotateUp);
+      // Camera.up = Vector3{0, 1, 0};
+
+      lastCameraRotation = config->cameraRotation;
+    }
+
+    // posição
+    if (!Vector3Equals(config->cameraPosition, lastCameraPosition)) {
+      Vector3 positionResult = config->cameraPosition - lastCameraPosition;
+
+      CameraMoveForward(&Camera, positionResult.x, moveInWorldPlane);
+      CameraMoveUp(&Camera, positionResult.y);
+      CameraMoveRight(&Camera, positionResult.z, moveInWorldPlane);
+
+      lastCameraPosition = config->cameraPosition;
+    }
+
+    // zoom
+    if (!FloatEquals(config->cameraZoom, lastCameraZoom)) {
+      float zoomResult = config->cameraZoom - lastCameraZoom;
+      CameraMoveToTarget(&Camera, zoomResult);
+      lastCameraZoom = config->cameraZoom;
+    }
+  }
   void Update() override {
     if (!Open)
       return;
-    x += 0.1;
     if (IsWindowResized()) {
       UnloadRenderTexture(ViewTexture);
       ViewTexture = LoadRenderTexture(sprite_width, sprite_height);
     }
 
+    UpdateMyCamera();
+
     BeginTextureMode(ViewTexture);
     ClearBackground(BLANK);
     BeginMode3D(Camera);
 
-    // DrawPlane(Vector3{ 0, 0, 0 }, Vector2{ 50, 50 }, BEIGE);
-    DrawModel(model, Vector3{0,0,0}, 1, WHITE);
+    DrawModel(model, Vector3{0, 0, 0}, 1, WHITE);
     DrawGrid(10, 1.0f);
     EndMode3D();
     EndTextureMode();
-    // R3D_SetRenderTarget(&ViewTexture);
-    // R3D_Begin(Camera);
-    // // BlendMode(BLEND_ALPHA);
-    // // for (int i = 0; i < 1; i++) {
-    // // R3D_DrawMesh(&meshes[i], &material, MatrixIdentity());
-    // // }
-    // // R3D_DrawModel(&model, Vector3{0,0,0},1);
-    // R3D_End();
   };
   void Shutdown() override {
     UnloadModel(model);
     UnloadRenderTexture(ViewTexture);
   }
   void Show() override {
-    ImGui::SetNextWindowSizeConstraints(ImVec2(sprite_width, sprite_height), ImVec2(2000, 2000));
+    ImGui::SetNextWindowSizeConstraints(ImVec2(sprite_width, sprite_height),
+                                        ImVec2(2000, 2000));
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
     if (ImGui::Begin("3D View", &Open, ImGuiWindowFlags_NoScrollbar)) {
       Focused = ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows);
       // draw the view
       rlImGuiImageRenderTextureFit(&ViewTexture, true);
 
-      if (ImGui::Button("save", ImVec2(4,4))) {
+      if (ImGui::Button("save", ImVec2(4, 4))) {
         Image img = LoadImageFromTexture(ViewTexture.texture);
         ImageFlipVertical(&img);
-        ExportImage(img,"final.png");
+        ExportImage(img, "final.png");
       }
     }
     ImGui::End();
@@ -141,8 +239,6 @@ int main() {
   const int screenHeight = 700;
   SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE);
   InitWindow(screenWidth, screenHeight, "Pixel Render");
-  // R3D_Init(screenWidth, screenHeight, R3D_FLAG_ASPECT_KEEP);
-  // R3D_SetState(R3D_FLAG_ASPECT_KEEP);
   rlImGuiSetup(true);
   SetTargetFPS(60);
 
@@ -150,10 +246,14 @@ int main() {
   io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
   Scene cena;
+  SceneConfig config;
   bool open = true;
 
+  config.Setup();
+  cena.config = &config;
   cena.Setup();
   cena.Open = open;
+  config.Open = open;
   ImGui::LoadIniSettingsFromDisk("default.ini");
   while (!WindowShouldClose()) {
     cena.Update();
@@ -164,15 +264,17 @@ int main() {
     rlImGuiBegin();
     // show ImGui Content
     showDockSpace();
-    ImGui::ShowDemoWindow(&open);
+    // ImGui::ShowDemoWindow(&open);
 
     if (cena.Open)
       cena.Show();
-    
+    if (config.Open)
+      config.Show();
+
     // salvador de padrão
-    // if (ImGui::Button("save", ImVec2(4,4))) {
-    //   ImGui::SaveIniSettingsToDisk("default.ini");
-    // }
+    if (ImGui::Button("save", ImVec2(10, 10))) {
+      ImGui::SaveIniSettingsToDisk("default.ini");
+    }
 
     // end ImGui Content
 
