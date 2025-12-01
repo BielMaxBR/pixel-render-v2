@@ -5,6 +5,7 @@
 #include "raymath.h"
 #include "rcamera.h"
 #include "rlImGui.h"
+#include <cstddef>
 
 static void HelpMarker(const char *desc) {
   ImGui::TextDisabled("(?)");
@@ -220,7 +221,7 @@ void MenuBar(SceneConfig *config) {
   }
 }
 
-void updateDialogs(SceneConfig *config) {
+void updateDialogs(SceneConfig *config, Scene *scene) {
   if (config->openFileDialogOpen) {
     IGFD::FileDialogConfig config;
     config.path = ".";
@@ -238,7 +239,11 @@ void updateDialogs(SceneConfig *config) {
       std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
       std::string filePath = ImGuiFileDialog::Instance()->GetCurrentPath();
       // action
-      printf("%s\n", filePathName.c_str());
+      UnloadModel(scene->model);
+      
+      scene->model = LoadModel(filePathName.c_str());
+      // printf("%s\n", filePathName.c_str());
+      config->openFileDialogOpen = false;
     } else {
       config->openFileDialogOpen = false;
     }
@@ -307,7 +312,7 @@ int main() {
 
     showDockSpace(&config);
     // ImGui::ShowDemoWindow(&open);
-    updateDialogs(&config);
+    updateDialogs(&config, &cena);
     if (cena.Open)
       cena.Show();
     if (config.Open)

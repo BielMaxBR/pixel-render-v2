@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(PixelRenderer)
+project(PixelRender)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -60,7 +60,7 @@ target_include_directories(imguifiledialog PUBLIC
 add_executable(game
     ${GAME_SOURCES}
 )
-
+set_target_properties(${PixelRender} PROPERTIES OUTPUT_NAME "Pixel Render")
 # Raylib
 # Se estiver usando MinGW com .a dentro de lib/
 target_link_directories(game PRIVATE lib)
