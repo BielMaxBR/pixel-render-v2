@@ -211,7 +211,9 @@ void MenuBar(SceneConfig *config) {
 
     if (ImGui::BeginMenu("File")) {
       config->openFileDialogOpen = ImGui::MenuItem("Open");
-
+      ImGui::Separator();
+      if (ImGui::MenuItem("Exit"))
+        CloseWindow();
       ImGui::EndMenu();
     }
     ImGui::EndMenuBar();
@@ -224,18 +226,22 @@ void updateDialogs(SceneConfig *config) {
     config.path = ".";
     ImGuiFileDialog::Instance()->OpenDialog("ChooseFile", "Choose a File",
                                             ".glb,.gltf", config);
+    ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByExtention, ".glb",
+                                              ImVec4(1.0f, 1.0f, 0.0f, 0.9f));
   }
 
   // display
-  if (ImGuiFileDialog::Instance()->Display("ChooseFile")) {
+  if (ImGuiFileDialog::Instance()->Display(
+          "ChooseFile", ImGuiWindowFlags_NoCollapse, ImVec2(600, 400),
+          ImVec2(2200, 1500))) {
     if (ImGuiFileDialog::Instance()->IsOk()) { // action if OK
       std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
       std::string filePath = ImGuiFileDialog::Instance()->GetCurrentPath();
       // action
       printf("%s\n", filePathName.c_str());
+    } else {
       config->openFileDialogOpen = false;
     }
-    if (ImGuiFileDialog::Instance()->)
     // close
     ImGuiFileDialog::Instance()->Close();
   }
@@ -294,7 +300,7 @@ int main() {
 
     BeginDrawing();
     ClearBackground(DARKGRAY);
-    
+
     // start ImGui Conent
     rlImGuiBegin();
     // show ImGui Content
