@@ -1,3 +1,4 @@
+#include "ImGuiFileDialog.h"
 #include "cstdio"
 #include "imgui.h"
 #include "raylib.h"
@@ -37,20 +38,35 @@ public:
   Vector3 cameraPosition = {0, 0, 0};
   Vector2 cameraRotation = {-45, 45};
   float cameraZoom = 5;
+  int cameraProjection = CAMERA_PERSPECTIVE;
+  float cameraFOV = 75;
+  bool openFileDialogOpen = false;
   void Setup() override { printf("fodase"); }
+
   void Show() override {
     ImGui::SetNextWindowSizeConstraints(ImVec2(100, 100), ImVec2(20000, 20000));
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
     if (ImGui::Begin("Scene Config", &Open, 0)) {
       ImGui::SeparatorText("Camera");
-      // ImGui::Tree
       Vec3Menu("Position", &cameraPosition, 0.1, -10000, 10000, true);
       Vec2Menu("Rotation", &cameraRotation, 0.1, -180, 180);
+
+      ImGui::RadioButton("Perspective", &cameraProjection, CAMERA_PERSPECTIVE);
+      ImGui::SameLine();
+      ImGui::RadioButton("Orthographic", &cameraProjection,
+                         CAMERA_ORTHOGRAPHIC);
       ImGui::DragFloat("Zoom", &cameraZoom, 0.1);
+
+      if (cameraProjection == CAMERA_PERSPECTIVE) {
+        ImGui::DragFloat("FOV", &cameraFOV);
+      } else {
+        ImGui::DragFloat("FOV", &cameraZoom);
+      }
     }
     ImGui::End();
     ImGui::PopStyleVar();
   }
+
   void Vec3Menu(const char *label, Vector3 *vec, float speed = 0.1,
                 float min = 0, float max = 1000, bool help = false) {
     float list[3] = {vec->x, vec->y, vec->z};
@@ -65,6 +81,7 @@ public:
     vec->y = list[1];
     vec->z = list[2];
   }
+
   void Vec2Menu(const char *label, Vector2 *vec, float speed = 0.1,
                 float min = 0, float max = 1000, bool help = false) {
     float list[2] = {vec->x, vec->y};
@@ -86,62 +103,44 @@ public:
   Model model;
   Material material;
   SceneConfig *config;
-  // R3D_Light light;
 
   int sprite_width = 128;
   int sprite_height = 128;
 
   Vector2 lastCameraRotation = {0, 0};
   Vector3 lastCameraPosition = {0, 0, 0};
+
   float lastCameraZoom = 0;
+
   void Setup() override {
     ViewTexture = LoadRenderTexture(sprite_width, sprite_height);
-    // lastCameraPosition = config->cameraPosition;
-    // lastCameraRotation = config->cameraRotation;
     lastCameraZoom = config->cameraZoom;
-    Camera = {.position = { lastCameraZoom, 0, 0},
+    Camera = {.position = {lastCameraZoom, 0, 0},
               .target = {0, 0, 0},
               .up = {0, 1, 0},
               .fovy = 75.0f,
               .projection = CAMERA_PERSPECTIVE};
-    // .projection = CAMERA_ORTHOGRAPHIC};
 
     model = LoadModel("neco.glb");
   };
-  void CameraMyYaw(Camera3D *camera, float angle, bool rotateAroundTarget, Vector3 up = Vector3{0,1,0})
-{
-
-    // View vector
-    Vector3 targetPosition = Vector3Subtract(camera->target, camera->position);
-
-    // Rotate view vector around up axis
-    targetPosition = Vector3RotateByAxisAngle(targetPosition, up, angle);
-
-    if (rotateAroundTarget)
-    {
-        // Move position relative to target
-        camera->position = Vector3Subtract(camera->target, targetPosition);
-    }
-    else // rotate around camera.position
-    {
-        // Move target relative to position
-        camera->target = Vector3Add(camera->position, targetPosition);
-    }
-}
   void UpdateMyCamera() {
     bool lockView = false;
     bool rotateAroundTarget = true;
     bool rotateUp = false;
     bool moveInWorldPlane = true;
     // rotação
+    Camera.fovy = config->cameraFOV;
+    if (Camera.projection == CAMERA_ORTHOGRAPHIC) {
+      Camera.fovy = config->cameraZoom;
+    }
+    Camera.projection = config->cameraProjection;
+
     if (!Vector2Equals(config->cameraRotation, lastCameraRotation)) {
       Vector2 rotationResult = config->cameraRotation - lastCameraRotation;
 
-      // CameraRoll(&Camera, rotationResult.z * DEG2RAD);
       CameraYaw(&Camera, -rotationResult.x * DEG2RAD, rotateAroundTarget);
       CameraPitch(&Camera, -rotationResult.y * DEG2RAD, lockView,
                   rotateAroundTarget, rotateUp);
-      // Camera.up = Vector3{0, 1, 0};
 
       lastCameraRotation = config->cameraRotation;
     }
@@ -150,9 +149,9 @@ public:
     if (!Vector3Equals(config->cameraPosition, lastCameraPosition)) {
       Vector3 positionResult = config->cameraPosition - lastCameraPosition;
 
-      CameraMoveForward(&Camera, positionResult.x, moveInWorldPlane);
+      CameraMoveForward(&Camera, positionResult.z, moveInWorldPlane);
       CameraMoveUp(&Camera, positionResult.y);
-      CameraMoveRight(&Camera, positionResult.z, moveInWorldPlane);
+      CameraMoveRight(&Camera, positionResult.x, moveInWorldPlane);
 
       lastCameraPosition = config->cameraPosition;
     }
@@ -207,14 +206,49 @@ public:
   }
 };
 
-void showDockSpace() {
+void MenuBar(SceneConfig *config) {
+  if (ImGui::BeginMenuBar()) {
+
+    if (ImGui::BeginMenu("File")) {
+      config->openFileDialogOpen = ImGui::MenuItem("Open");
+
+      ImGui::EndMenu();
+    }
+    ImGui::EndMenuBar();
+  }
+}
+
+void updateDialogs(SceneConfig *config) {
+  if (config->openFileDialogOpen) {
+    IGFD::FileDialogConfig config;
+    config.path = ".";
+    ImGuiFileDialog::Instance()->OpenDialog("ChooseFile", "Choose a File",
+                                            ".glb,.gltf", config);
+  }
+
+  // display
+  if (ImGuiFileDialog::Instance()->Display("ChooseFile")) {
+    if (ImGuiFileDialog::Instance()->IsOk()) { // action if OK
+      std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
+      std::string filePath = ImGuiFileDialog::Instance()->GetCurrentPath();
+      // action
+      printf("%s\n", filePathName.c_str());
+      config->openFileDialogOpen = false;
+    }
+    if (ImGuiFileDialog::Instance()->)
+    // close
+    ImGuiFileDialog::Instance()->Close();
+  }
+}
+
+void showDockSpace(SceneConfig *config) {
   static bool dockingEnabled = true;
 
   ImGuiWindowFlags window_flags =
       ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
       ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
       ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus |
-      ImGuiWindowFlags_NoBackground;
+      ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_MenuBar;
 
   ImGuiViewport *viewport = ImGui::GetMainViewport();
 
@@ -227,6 +261,7 @@ void showDockSpace() {
   ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 
   ImGui::Begin("DockSpaceHost", nullptr, window_flags);
+  MenuBar(config);
 
   ImGui::PopStyleVar(3);
   ImGuiID dockspace_id = ImGui::GetID("MainDockSpace");
@@ -244,11 +279,10 @@ int main() {
 
   ImGuiIO &io = ImGui::GetIO();
   io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+  bool open = true;
 
   Scene cena;
   SceneConfig config;
-  bool open = true;
-
   config.Setup();
   cena.config = &config;
   cena.Setup();
@@ -260,12 +294,14 @@ int main() {
 
     BeginDrawing();
     ClearBackground(DARKGRAY);
+    
     // start ImGui Conent
     rlImGuiBegin();
     // show ImGui Content
-    showDockSpace();
-    // ImGui::ShowDemoWindow(&open);
 
+    showDockSpace(&config);
+    // ImGui::ShowDemoWindow(&open);
+    updateDialogs(&config);
     if (cena.Open)
       cena.Show();
     if (config.Open)
@@ -283,7 +319,6 @@ int main() {
   }
   cena.Shutdown();
   rlImGuiShutdown();
-  // R3D_Close();
   CloseWindow();
   return 0;
 }

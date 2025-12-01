@@ -8,6 +8,7 @@ set(SRC_DIR src)
 set(EXTERNAL_DIR external)
 set(IMGUI_DIR ${EXTERNAL_DIR}/imgui)
 set(RLIMGUI_DIR ${EXTERNAL_DIR}/rlimgui)
+set(IMGUIFILEDIALOG_DIR ${EXTERNAL_DIR}/imguifiledialog)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out)
 
@@ -21,6 +22,9 @@ file(GLOB IMGUI_SRC
 )
 file(GLOB RLIMGUI_SRC
     ${RLIMGUI_DIR}/*.cpp
+)
+file(GLOB IMGUIFILEDIALOG_SRC
+    ${IMGUIFILEDIALOG_DIR}/*.cpp
 )
 
 # ImGui (compilado como biblioteca própria)
@@ -42,6 +46,15 @@ target_include_directories(rlimgui PUBLIC
     ${RLIMGUI_DIR}/include
     include
 )
+# rlImGui (biblioteca separada)
+add_library(imguifiledialog STATIC
+    ${IMGUIFILEDIALOG_SRC}
+)
+
+target_include_directories(imguifiledialog PUBLIC
+    ${IMGUI_DIR}/include
+    ${IMGUIFILEDIALOG_DIR}/include
+)
 
 # Binário final do jogo
 add_executable(game
@@ -56,33 +69,35 @@ target_include_directories(game PRIVATE
     include
     ${IMGUI_DIR}/include
     ${RLIMGUI_DIR}/include
+    ${IMGUIFILEDIALOG_DIR}/include
 )
 
-add_library(r3d_lib STATIC IMPORTED)
-set_target_properties(r3d_lib PROPERTIES
-    IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/lib/libr3d.a"
-    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include"
-)
+# add_library(r3d_lib STATIC IMPORTED)
+# set_target_properties(r3d_lib PROPERTIES
+#     IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/lib/libr3d.a"
+#     INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include"
+# )
 
 
-add_library(assimp_lib STATIC IMPORTED)
-set_target_properties(assimp_lib PROPERTIES
-  IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/lib/libassimp.a"
-  INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include"
-)
-add_library(zlib_static_lib STATIC IMPORTED)
-set_target_properties(zlib_static_lib PROPERTIES
-  IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/lib/libzlibstatic.a"
-  INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include/"
-)
+# add_library(assimp_lib STATIC IMPORTED)
+# set_target_properties(assimp_lib PROPERTIES
+#   IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/lib/libassimp.a"
+#   INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include"
+# )
+# add_library(zlib_static_lib STATIC IMPORTED)
+# set_target_properties(zlib_static_lib PROPERTIES
+#   IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/lib/libzlibstatic.a"
+#   INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include/"
+# )
 
 target_link_libraries(game PRIVATE
-  r3d_lib
-  assimp_lib
+#   r3d_lib
+#   assimp_lib
   raylib
   imgui
+  imguifiledialog
   rlimgui
-  zlib_static_lib
+#   zlib_static_lib
   gdi32
   winmm
   imm32
