@@ -110,8 +110,8 @@ public:
   Material material;
   SceneConfig *config;
 
-  int sprite_width = 128;
-  int sprite_height = 128;
+  int sprite_width = 64;
+  int sprite_height = 64;
 
   Vector2 lastCameraRotation = {0, 0};
   Vector3 lastCameraPosition = {0, 0, 0};
@@ -218,12 +218,12 @@ public:
   }
 
   void ExportAnim() {
-    int sides = 8;
+    int sides = 16;
     float actual_rotation = config->cameraRotation.x;
     withGrid = false;
     int animIndex = 0;
     int frameCount = 1;
-    int frameRate = 24;
+    int frameRate = 12;
     int animCurrentFrame = 0;
     printf("%d\n",animCount);
     
@@ -235,12 +235,12 @@ public:
     // animCurrentFrame = (animCurrentFrame + 1)%anim.frameCount;
     
     // UpdateModelAnimation(model, anim, animCurrentFrame);
-
-    Image sheet = GenImageColor(sprite_width * frameCount, sprite_height * sides, BLANK);
+    float totalFrames = (float)frameCount/(60.0/(float)frameRate);
+    Image sheet = GenImageColor(sprite_width * (int)ceil(totalFrames), sprite_height * sides, BLANK);
 
     for (int i = 0; i < sides; i++) {
       config->cameraRotation.x = (360.0/sides)*i + actual_rotation;
-      for (int frame = 0; frame < (float)frameCount/(60.0/(float)frameRate); frame++) {
+      for (int frame = 0; frame < totalFrames; frame++) {
         if (animCount > 0) {
           UpdateModelAnimation(model, anim, frameCutter(frame,frameRate));
         }
@@ -290,6 +290,8 @@ void updateDialogs(SceneConfig *config, Scene *scene) {
                                             ".glb,.gltf", config);
     ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByExtention, ".glb",
                                               ImVec4(1.0f, 1.0f, 0.0f, 0.9f));
+    ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByExtention, ".gltf",
+                                              ImVec4(0.8f, 1.0f, 0.0f, 0.9f));
   }
 
   // display
