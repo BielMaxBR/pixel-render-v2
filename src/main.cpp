@@ -5,7 +5,7 @@
 #include "raymath.h"
 #include "rcamera.h"
 #include "rlImGui.h"
-#include <cstddef>
+#include <string>
 
 static void HelpMarker(const char *desc) {
   ImGui::TextDisabled("(?)");
@@ -16,6 +16,11 @@ static void HelpMarker(const char *desc) {
     ImGui::EndTooltip();
   }
 }
+
+int frameCutter(int now, int frameRate) {
+  return 60/frameRate * now;
+}
+
 
 class DefaultWindow {
 public:
@@ -113,6 +118,11 @@ public:
 
   float lastCameraZoom = 0;
 
+  bool withGrid = true;
+
+  ModelAnimation *modelAnimations;
+  int animCount = 0;
+
   void Setup() override {
     ViewTexture = LoadRenderTexture(sprite_width, sprite_height);
     lastCameraZoom = config->cameraZoom;
@@ -122,8 +132,9 @@ public:
               .fovy = 75.0f,
               .projection = CAMERA_PERSPECTIVE};
 
-    model = LoadModel("neco.glb");
+    model = LoadModel("pistola.gltf");
   };
+
   void UpdateMyCamera() {
     bool lockView = false;
     bool rotateAroundTarget = true;
@@ -179,7 +190,9 @@ public:
     BeginMode3D(Camera);
 
     DrawModel(model, Vector3{0, 0, 0}, 1, WHITE);
-    DrawGrid(10, 1.0f);
+    if (withGrid) {
+      DrawGrid(10, 1.0f);
+    }
     EndMode3D();
     EndTextureMode();
   };
@@ -197,13 +210,61 @@ public:
       rlImGuiImageRenderTextureFit(&ViewTexture, true);
 
       if (ImGui::Button("save", ImVec2(4, 4))) {
-        Image img = LoadImageFromTexture(ViewTexture.texture);
-        ImageFlipVertical(&img);
-        ExportImage(img, "final.png");
+        ExportAnim();
       }
     }
     ImGui::End();
     ImGui::PopStyleVar();
+  }
+
+  void ExportAnim() {
+    int sides = 8;
+    float actual_rotation = config->cameraRotation.x;
+    withGrid = false;
+    int animIndex = 0;
+    int frameCount = 1;
+    int frameRate = 24;
+    int animCurrentFrame = 0;
+    printf("%d\n",animCount);
+    
+    ModelAnimation anim;
+    if (animCount > 0) {
+      anim = modelAnimations[animIndex];
+      frameCount = anim.frameCount;
+    }
+    // animCurrentFrame = (animCurrentFrame + 1)%anim.frameCount;
+    
+    // UpdateModelAnimation(model, anim, animCurrentFrame);
+
+    Image sheet = GenImageColor(sprite_width * frameCount, sprite_height * sides, BLANK);
+
+    for (int i = 0; i < sides; i++) {
+      config->cameraRotation.x = (360.0/sides)*i + actual_rotation;
+      for (int frame = 0; frame < (float)frameCount/(60.0/(float)frameRate); frame++) {
+        if (animCount > 0) {
+          UpdateModelAnimation(model, anim, frameCutter(frame,frameRate));
+        }
+        Update();
+        Image img = LoadImageFromTexture(ViewTexture.texture);
+        ImageFlipVertical(&img);
+
+
+        Rectangle srcRec = {0, 0, (float)sprite_width, (float)sprite_height};
+        // Rectangle destPos = {0, 0, (float)sprite_width, (float)sprite_height};
+        Rectangle destPos = {(float)(frame * sprite_width), (float)(i * sprite_height), (float)sprite_width, (float)sprite_height};
+        ImageDraw(&sheet, img, srcRec, destPos, WHITE);
+
+        UnloadImage(img); // libera o frame old
+        // std::string text = "final";
+        // text.insert(text.size(), std::to_string(i));
+        // text.insert(text.size(), ".png");
+        // ExportImage(img, text.c_str());
+      }
+    }
+    ExportImage(sheet, "final.png");
+    // UnloadImage(sheet);
+    withGrid = true;
+    config->cameraRotation.x = actual_rotation;
   }
 };
 
@@ -242,6 +303,7 @@ void updateDialogs(SceneConfig *config, Scene *scene) {
       UnloadModel(scene->model);
       
       scene->model = LoadModel(filePathName.c_str());
+      scene->modelAnimations = LoadModelAnimations(filePathName.c_str(), &scene->animCount);
       // printf("%s\n", filePathName.c_str());
       config->openFileDialogOpen = false;
     } else {
@@ -280,6 +342,8 @@ void showDockSpace(SceneConfig *config) {
 
   ImGui::End();
 }
+
+
 int main() {
   const int screenWidth = 1200;
   const int screenHeight = 700;
@@ -324,6 +388,7 @@ int main() {
     }
 
     // end ImGui Content
+
 
     rlImGuiEnd();
     EndDrawing();
