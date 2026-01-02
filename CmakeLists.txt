@@ -57,15 +57,15 @@ target_include_directories(imguifiledialog PUBLIC
 )
 
 # Binário final do jogo
-add_executable(game
+add_executable(PixelRender
     ${GAME_SOURCES}
 )
 set_target_properties(${PixelRender} PROPERTIES OUTPUT_NAME "Pixel Render")
 # Raylib
 # Se estiver usando MinGW com .a dentro de lib/
-target_link_directories(game PRIVATE lib)
+target_link_directories(PixelRender PRIVATE lib)
 
-target_include_directories(game PRIVATE
+target_include_directories(PixelRender PRIVATE
     include
     ${IMGUI_DIR}/include
     ${RLIMGUI_DIR}/include
@@ -90,7 +90,7 @@ target_include_directories(game PRIVATE
 #   INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include/"
 # )
 
-target_link_libraries(game PRIVATE
+target_link_libraries(PixelRender PRIVATE
 #   r3d_lib
 #   assimp_lib
   raylib
