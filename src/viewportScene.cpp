@@ -62,7 +62,10 @@ void ViewportScene::UpdateMyCamera() {
 void ViewportScene::Update() {
   if (!Open)
     return;
-  if (IsWindowResized()) {
+  // printf("%f\n", config->spriteSize.x);
+  if (sprite_width != config->spriteSize.x || sprite_height != config->spriteSize.y) {
+    sprite_width = config->spriteSize.x;
+    sprite_height = config->spriteSize.y;
     UnloadRenderTexture(ViewTexture);
     ViewTexture = LoadRenderTexture(sprite_width, sprite_height);
   }

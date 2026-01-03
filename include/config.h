@@ -9,10 +9,13 @@ public:
   int cameraProjection = CAMERA_PERSPECTIVE;
   float cameraFOV = 75;
   bool openFileDialogOpen = false;
+  Vector2 spriteSize = {64, 64};
   void Setup() override;
   void Show() override;
   void Vec3Menu(const char *label, Vector3 *vec, float speed = 0.1,
                 float min = 0, float max = 1000, bool help = false);
-  void Vec2Menu(const char *label, Vector2 *vec, float speed = 0.1,
+  void Vec2Menuf(const char *label, Vector2 *vec, float speed = 0.1,
                 float min = 0, float max = 1000, bool help = false);
+  void Vec2Menui(const char *label, Vector2 *vec,float speed,
+              float min, float max, bool help);
 };
