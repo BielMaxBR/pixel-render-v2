@@ -1,0 +1,42 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 15,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "windows",
+      "displayName": "Windows (MinGW)",
+      "description": "Configuração para compilar no Windows usando o MinGW GCC",
+      "generator": "MinGW Makefiles",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++"
+      }
+    },
+    {
+      "name": "linux",
+      "displayName": "Linux",
+      "description": "Configuração padrão para compilar no Linux",
+      "generator": "Unix Makefiles",
+      "binaryDir": "${sourceDir}/build"
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "run-windows",
+      "configurePreset": "windows",
+      "displayName": "Compilar e Rodar (Windows)",
+      "targets": ["run"]
+    },
+    {
+      "name": "run-linux",
+      "configurePreset": "linux",
+      "displayName": "Compilar e Rodar (Linux)",
+      "targets": ["run"]
+    }
+  ]
+}
