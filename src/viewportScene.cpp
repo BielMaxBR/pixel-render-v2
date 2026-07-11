@@ -96,9 +96,9 @@ void ViewportScene::Show() {
     // draw the view
     rlImGuiImageRenderTextureFit(&ViewTexture, true);
 
-    if (ImGui::Button("save", ImVec2(4, 4))) {
-      ExportAnim();
-    }
+    // if (ImGui::Button("save", ImVec2(4, 4))) {
+    //   ExportAnim();
+    // }
   }
   ImGui::End();
   ImGui::PopStyleVar();
@@ -108,16 +108,18 @@ void ViewportScene::ExportAnim() {
   int sides = 1;
   float actual_rotation = config->cameraRotation.x;
   withGrid = false;
-  int animIndex = 0;
+  int animIndex = 1;
   int frameCount = 1;
   int frameRate = 12;
   int animCurrentFrame = 0;
-  printf("%d\n",animCount);
+  printf("o animCount é %d\n",animCount);
   
   ModelAnimation anim;
   if (animCount > 0) {
     anim = modelAnimations[animIndex];
-    frameCount = anim.frameCount;
+    frameCount = anim.keyframeCount;
+  } else {
+    printf("tem nada nao\n");
   }
   // animCurrentFrame = (animCurrentFrame + 1)%anim.frameCount;
   

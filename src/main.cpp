@@ -127,7 +127,8 @@ int main() {
 
     // salvador de padrão
     if (ImGui::Button("save", ImVec2(10, 10))) {
-      ImGui::SaveIniSettingsToDisk("default.ini");
+      // ImGui::SaveIniSettingsToDisk("default.ini");
+      cena.ExportAnim();
     }
 
     // end ImGui Content
